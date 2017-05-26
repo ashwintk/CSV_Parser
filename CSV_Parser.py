@@ -9,7 +9,6 @@ def splitRecordAndReturnAnArray_NoDoubleQuotesCharacter(my_str, sep):
 # One must note that this function will be only called when there is a quote character in the record
 def splitRecordAndReturnAnArray_DoubleQuotesCharacter(my_str, sep, quotes_char):
     returnArr = []
-
     return my_str.lstrip().strip().split(sep)
 
 def getMaxColumnFrequency(parsed_data):
@@ -36,7 +35,7 @@ def customCSV_Parser(fileName, sep=",", skip=0, header=False, doubleQuotesChar='
     # Throw an error if a file does not exist
     if not os.path.exists(fileName):
         print "File name doesn't exist. Check your file path."
-        exit(0)
+        exit(1)
 
     # Counter to store number of lines processed
     lineCounter = 0
@@ -70,11 +69,35 @@ def customCSV_Parser(fileName, sep=",", skip=0, header=False, doubleQuotesChar='
                     for col in record:
                         temp_dict[i] = col
                         i += 1
-                    temp_dict['num_cols'] = i # To check if the number of columns match
-                    parsed_data.append(temp_dict)
+                    temp_dict['num_cols'] = i  # To check if the number of columns match
+                    # If the header option is enabled
+                    if header:
+                        # Number of columns in the header matched with this record
+                        if i == len(header_data['column_names']):
+                            # Add data to parsed information
+                            parsed_data.append(temp_dict)
+                        # If the header option is enabled and the number of columns in the dataset does'nt match
+                        # with this record & line skip option is enabled
+                        elif i != len(header_data['column_names']) and skipMissing:
+                            # Print a message and do nothing
+                            print "Line #", lineCounter, " does not confirm to the header specified. " \
+                                                         "Line skip is enabled, so this line is ignored"
+                        # If the header option is enabled and the number of columns in the dataset does'nt match
+                        # with this record & line skip option is disabled
+                        else:
+                            # Print a message and exit
+                            print "Line #", lineCounter, " does not confirm to the header specified. " \
+                                                         "Line skip is disabled"
+                            exit(1)
+                    else:
+                        # If header is not specified we do not know how many columns are there in a dataset.
+                        # So I have not checked the number of columns here. To enable me to check the number of columns
+                        # I have added a variable called num_cols
+                        parsed_data.append(temp_dict)
+
             lineCounter += 1
     readHandle.close()
-    return
+    return parsed_data
 
 
-customCSV_Parser(fileName="/Users/ashwinkumar/Desktop/R_Working_Dir/FinalData.csv", skip=2, header=True)
+print customCSV_Parser(fileName="/Users/ashwinkumar/Desktop/R_Working_Dir/FinalData.csv", skip=2, header=True)

@@ -65,6 +65,28 @@ def filterFrequentlyOccurringColumns(parsed_data, frequently_occurring_columns):
     return filtered_dataset
 
 
+# This function is used to return formatted data
+# This function can be used when there is a header or not
+# This function takes the following arguments
+#      1. Parsed dataset
+#      2. Header flag
+#      3. Header data dictionary
+# This function returns formatted dataset
+
+
+def formatDataset_InferColumnDataType(parsed_data, header, freq_occuring_num=0, header_data = {}):
+    # If there is no header create column names. Column names will be numbered from 1
+    if not header:
+        header_data['column_names'] = map(str, range(0, freq_occuring_num))
+    col_count = len(header_data['column_names'])
+    returned_data =[[] for _ in range(0, col_count)]
+
+    for record in parsed_data:
+        for i in range(0, col_count):
+            returned_data[i].append(record[i])
+
+    return header_data, returned_data
+
 
 # This function parses a CSV file
 #
@@ -145,7 +167,7 @@ def customCSV_Parser(fileName, sep=",", skip=0, header=False, doubleQuotesChar='
                         parsed_data.append(temp_dict)
             lineCounter += 1
     readHandle.close()
-
+    freq_key = -1
     # If header is not set, check for the number of columns
     if not header:
         # Check if the number of columns in all records are same
@@ -158,7 +180,9 @@ def customCSV_Parser(fileName, sep=",", skip=0, header=False, doubleQuotesChar='
             print " Dataset doesn't have uniform number of columns " \
                   "Line skip is disabled. Skipped non-confirming lines"
             parsed_data = filterFrequentlyOccurringColumns(parsed_data, freq_key)
-    return parsed_data
+
+    header_data, parsed_data = formatDataset_InferColumnDataType(parsed_data, header, freq_key, header_data)
+    return header_data, parsed_data
 
 # Test Cases
 
@@ -174,4 +198,5 @@ def customCSV_Parser(fileName, sep=",", skip=0, header=False, doubleQuotesChar='
 # Header flag = True & Incorrect number of columns & Skip bad lines enabled
 # print customCSV_Parser(fileName="/Users/ashwinkumar/Desktop/ZionsBankCorpChallenge/TestData/Incorrect_Num_Columns_No_Quotes_Character_W_Header.csv", header=True, skipMissing=True)
 # Header flag = False & Incorrect number of columns & Skip bad lines enabled
-# print customCSV_Parser(fileName="/Users/ashwinkumar/Desktop/ZionsBankCorpChallenge/TestData/Incorrect_Num_Columns_No_Quotes_Character_WO_Header.csv", header=False, skipMissing=True)
+print customCSV_Parser(fileName="/Users/ashwinkumar/Desktop/ZionsBankCorpChallenge/TestData/Incorrect_Num_Columns_No_Quotes_Character_WO_Header.csv", header=False, skipMissing=True)
+
